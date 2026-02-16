@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { PlayersDb } from "../data/types";
 import { loadPlayerData, type PlayerPageData, type HoleScores } from "../data/playerDataLoader";
+import TeePill from "../ui/TeePill";
 import tournData from "../../torneio-greatgolf.json";
 
 /* ─── Types ─── */
@@ -271,15 +272,13 @@ function DrawTable({ draw, onSelectPlayer }: { draw: DrawEntry[]; onSelectPlayer
                 <tr key={i} className={`tourn-draw-row${isGroupStart ? " tourn-group-first" : ""}${isGroupEnd ? " tourn-group-last" : ""}${d.sex === "F" ? " tourn-female-row" : ""}`}>
                   <td className="tourn-draw-time">{isGroupStart ? d.time : ""}</td>
                   <td className="tourn-draw-tee">
-                    {showTeeBadge && (
-                      <span className={`tourn-tee-badge tourn-tee-${d.teeColor.toLowerCase()}`}>{d.teeColor}</span>
-                    )}
+                    {showTeeBadge && <TeePill name={d.teeColor} />}
                   </td>
                   <td className="tourn-draw-player">
                     <PlayerLink fed={d.fed} name={d.name} onSelect={onSelectPlayer} />
                     {pja && <span className="jog-pill tourn-pill-pja">PJA</span>}
                     {!d.fed && <span className="jog-pill tourn-pill-intl">INTL</span>}
-                    {d.sex === "F" && <span className="tourn-pill-tee-f">♀ {d.teeColor}</span>}
+                    {d.sex === "F" && <span className="jog-pill jog-pill-sex-F">♀</span>}
                     {esc && <span className={`jog-pill jog-pill-escalao jog-pill-escalao-${esc.toLowerCase().replace("-", "")}`}>{esc}</span>}
                     {year && <span className="jog-pill jog-pill-birth">{year}</span>}
                     <span className="jog-pill jog-pill-club">{d.club}</span>
@@ -363,7 +362,7 @@ function getPlayerHoles(holeData: Map<string, PlayerHoles>, fed: string | null, 
   return undefined;
 }
 
-type SortKey = "pos" | "name" | "gross" | "toPar" | "out" | "in";
+type SortKey = "pos" | "name" | "gross" | "toPar" | "out" | "in" | "sd";
 type SortDir = "asc" | "desc";
 type LbCat = "all" | "wagr" | "sub14" | "sub12";
 
@@ -454,14 +453,14 @@ function AllResultsView({ players, onSelectPlayer }: { players: PlayersDb; onSel
                   <td>
                     <div className="tourn-lb-pills">
                       <PlayerLink fed={r.fed} name={r.name} onSelect={onSelectPlayer} />
-                      {pja && <span className="tourn-pill-pja">PJA</span>}
-                      {!r.fed && <span className="tourn-pill-intl">INTL</span>}
-                      {female && <span className="tourn-pill-tee-f">♀</span>}
+                      {pja && <span className="jog-pill tourn-pill-pja">PJA</span>}
+                      {!r.fed && <span className="jog-pill tourn-pill-intl">INTL</span>}
+                      {female && <span className="jog-pill jog-pill-sex-F">♀</span>}
                       {year && <span className="jog-pill jog-pill-birth">{year}</span>}
                     </div>
                   </td>
                   <td><span style={{ fontSize: 11, fontWeight: 700, color: catColors[r.catKey] || "#333", background: `${catColors[r.catKey] || "#333"}15`, padding: "1px 6px", borderRadius: 3 }}>{r.catLabel}</span></td>
-                  <td style={{ fontSize: 11 }}>{r.tee}</td>
+                  <td><TeePill name={r.tee} /></td>
                   <td className="r tourn-mono" style={{ fontWeight: 700 }}>{r.gross}</td>
                   <td className={`r tourn-mono`}>
                     <span className={r.toPar != null && r.toPar <= 0 ? "tp-under" : r.toPar != null && r.toPar! <= 5 ? "tp-over1" : "tp-over2"} style={{ fontWeight: 700 }}>
@@ -535,7 +534,11 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
     const hasHoles = ph && ph.holes.length >= 18;
     const outScore = hasHoles ? ph.holes.slice(0, 9).reduce((s, v) => s + (v ?? 0), 0) : null;
     const inScore = hasHoles ? ph.holes.slice(9, 18).reduce((s, v) => s + (v ?? 0), 0) : null;
-    return { ...r, ph, hasHoles, outScore, inScore };
+    const drawEntry = ALL_DRAW.find(d => (r.fed && d.fed === r.fed) || d.name === r.name);
+    const sex = drawEntry?.sex ?? "M";
+    const teeColor = drawEntry?.teeColor ?? catTeeName;
+    const sd = r.gross != null ? calcSD(r.gross, teeColor, sex) : null;
+    return { ...r, ph, hasHoles, outScore, inScore, sd };
   });
 
   /* Sort */
@@ -548,6 +551,7 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
       case "toPar": return ((a.toPar ?? 999) - (b.toPar ?? 999)) * dir;
       case "out": return ((a.outScore ?? 999) - (b.outScore ?? 999)) * dir;
       case "in": return ((a.inScore ?? 999) - (b.inScore ?? 999)) * dir;
+      case "sd": return ((a.sd ?? 999) - (b.sd ?? 999)) * dir;
       default: return 0;
     }
   });
@@ -586,7 +590,9 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
 
       {/* Category-specific view */}
       {lbCat !== "all" && <>
-      <div className="tourn-meta">{catDay} · Par {catCourse.par} · CR {catCourse.cr} / Slope {catCourse.slope} · Vilamoura – Laguna · {catTeeName} {catTotalM}m</div>
+      <div className="tourn-meta" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        {catDay} · Par {catCourse.par} · CR {catCourse.cr} / Slope {catCourse.slope} · Vilamoura – Laguna · <TeePill name={catTeeName} /> {catTotalM}m
+      </div>
 
       {/* Sub-filters: PJA for all categories, escalão for WAGR only */}
       <div className="tourn-tabs" style={{ marginBottom: 12 }}>
@@ -625,6 +631,7 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                     <th key={h.h} className={`r tourn-hole-col${h.h === 10 ? " tourn-in-border" : ""}`}>{h.h}</th>
                   ))}
                   <th className="r tourn-sum-col sortable" onClick={() => toggleSort("in")}>IN{arrow("in")}</th>
+                  <th className="r tourn-sum-col sortable" onClick={() => toggleSort("sd")} style={{ width: 48 }}>SD{arrow("sd")}</th>
                 </tr>
                 <tr className="tourn-par-row">
                   <td></td><td className="tourn-lbl">Par</td>
@@ -633,6 +640,7 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                   <td className="r">{catParOut}</td>
                   {catHoles.slice(9).map(h => <td key={h.h} className={`r${h.h === 10 ? " tourn-in-border" : ""}`}>{h.par}</td>)}
                   <td className="r">{catParIn}</td>
+                  <td></td>
                 </tr>
                 <tr className="tourn-dist-row">
                   <td></td><td className="tourn-lbl">Metros</td>
@@ -641,6 +649,7 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                   <td className="r">{catHoles.slice(0,9).reduce((s,h) => s+h.m, 0)}</td>
                   {catHoles.slice(9).map(h => <td key={h.h} className={`r${h.h === 10 ? " tourn-in-border" : ""}`}>{h.m}</td>)}
                   <td className="r">{catHoles.slice(9).reduce((s,h) => s+h.m, 0)}</td>
+                  <td></td>
                 </tr>
                 <tr className="tourn-si-row">
                   <td></td><td className="tourn-lbl">SI</td>
@@ -648,6 +657,7 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                   {catHoles.slice(0, 9).map(h => <td key={h.h} className="r">{h.si}</td>)}
                   <td></td>
                   {catHoles.slice(9).map(h => <td key={h.h} className={`r${h.h === 10 ? " tourn-in-border" : ""}`}>{h.si}</td>)}
+                  <td></td>
                   <td></td>
                 </tr>
               </thead>
@@ -667,12 +677,12 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                       <td className="tourn-lb-name-col">
                         <div className="tourn-lb-pills">
                           <PlayerLink fed={r.fed} name={r.name} onSelect={onSelectPlayer} />
-                          {pja && <span className="tourn-pill-pja">PJA</span>}
-                          {!r.fed && <span className="tourn-pill-intl">INTL</span>}
-                          {female && <span className="tourn-pill-tee-f">♀ {drawEntry?.teeColor ?? "Azuis"}</span>}
+                          {pja && <span className="jog-pill tourn-pill-pja">PJA</span>}
+                          {!r.fed && <span className="jog-pill tourn-pill-intl">INTL</span>}
+                          {female && <><span className="jog-pill jog-pill-sex-F">♀</span><TeePill name={drawEntry?.teeColor ?? "Azuis"} /></>}
                           {lbCat === "wagr" && esc && <span className={`jog-pill jog-pill-escalao jog-pill-escalao-${esc.toLowerCase().replace("-", "")}`}>{esc}</span>}
                           {year && <span className="jog-pill jog-pill-birth">{year}</span>}
-                          {drawEntry && <span className="tourn-pill-hcp">{fmtHcp(drawEntry.hcpExact)}</span>}
+                          {drawEntry && <span className="jog-pill jog-pill-stats">{fmtHcp(drawEntry.hcpExact)}</span>}
                         </div>
                       </td>
                       <td className={`r tourn-sum-val ${r.toPar != null && r.toPar <= 0 ? "tourn-sum-under" : "tourn-sum-over"}`}>{r.gross ?? "-"}</td>
@@ -704,6 +714,12 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                       {/* IN */}
                       <td className={`r tourn-sum-val ${inToPar != null && inToPar <= 0 ? "tourn-sum-under" : "tourn-sum-over"}`}>
                         {r.inScore != null ? <>{r.inScore} <span className={`tourn-half-par ${inToPar! <= 0 ? "tp-under" : "tp-over1"}`}>({fmtToPar(inToPar)})</span></> : "-"}
+                      </td>
+                      {/* SD */}
+                      <td className="r tourn-sum-val" style={{ fontSize: 11 }}>
+                        {r.sd != null ? (
+                          <span className={r.sd <= 0 ? "tp-under" : r.sd <= 5 ? "tp-over1" : r.sd <= 15 ? "" : "tp-over2"} style={{ fontWeight: 600 }}>{r.sd.toFixed(1)}</span>
+                        ) : "-"}
                       </td>
                     </tr>
                   );
@@ -781,12 +797,12 @@ function LeaderboardView({ players, holeData, onSelectPlayer }: { players: Playe
                       <td className="tourn-lb-name-col">
                         <div className="tourn-lb-pills">
                           <PlayerLink fed={d.fed} name={d.name} onSelect={onSelectPlayer} />
-                          {pja && <span className="tourn-pill-pja">PJA</span>}
-                          {!d.fed && <span className="tourn-pill-intl">INTL</span>}
-                          {female && <span className="tourn-pill-tee-f">♀ {d.teeColor}</span>}
+                          {pja && <span className="jog-pill tourn-pill-pja">PJA</span>}
+                          {!d.fed && <span className="jog-pill tourn-pill-intl">INTL</span>}
+                          {female && <><span className="jog-pill jog-pill-sex-F">♀</span><TeePill name={d.teeColor} /></>}
                           {esc && <span className={`jog-pill jog-pill-escalao jog-pill-escalao-${esc.toLowerCase().replace("-", "")}`}>{esc}</span>}
                           {year && <span className="jog-pill jog-pill-birth">{year}</span>}
-                          {d.hcpExact != null && <span className="tourn-pill-hcp">{fmtHcp(d.hcpExact)}</span>}
+                          {d.hcpExact != null && <span className="jog-pill jog-pill-stats">{fmtHcp(d.hcpExact)}</span>}
                         </div>
                       </td>
                       <td className="r tourn-mono">{fmtHcp(d.hcpExact)}</td>
@@ -922,7 +938,7 @@ function AnalysisView({ players, holeData, playerHistory, onSelectPlayer }: { pl
                       {cat === "wagr" && <td className="r tourn-mono" style={{ fontWeight: 700 }}>{f.d1Pos ?? "—"}</td>}
                       <td>
                         <PlayerLink fed={f.fed} name={f.name} onSelect={onSelectPlayer} />
-                        {pja && <span className="tourn-pill-pja" style={{ marginLeft: 4 }}>PJA</span>}
+                        {pja && <span className="jog-pill tourn-pill-pja" style={{ marginLeft: 4 }}>PJA</span>}
                         <span className={`jog-pill jog-pill-escalao jog-pill-escalao-${f.escalao.toLowerCase().replace("-", "")}`} style={{ marginLeft: 4, fontSize: 9 }}>{f.escalao}</span>
                       </td>
                       <td className="r tourn-mono">{fmtHcp(f.hcpExact)}</td>

@@ -1,42 +1,69 @@
 import { useMemo, useState } from "react";
-import type { Course, Tee, SexFilter } from "../data/types";
+import type { Course, Tee } from "../data/types";
 import TeeBadge from "../ui/TeeBadge";
+import { getTeeHex } from "../utils/teeColors";
 import { fmt, fmtCR, norm, titleCase } from "../utils/format";
-import { sortTees, filterTees, teeHexFromTee } from "../utils/teeUtils";
 
 type Props = { courses: Course[] };
 
+type SexFilter = "ALL" | "M" | "F";
 type HolesMode = "18" | "front9" | "back9";
 
-/* ─── Helpers ─── */
+/* â”€â”€â”€ Helpers â”€â”€â”€ */
 
-/** Score Differential = (113 / Slope) × (Score - CR - PCC) */
+function teeHex(t: Tee): string {
+  return getTeeHex(t.teeName, t.scorecardMeta?.teeColor);
+}
+
+function sexRank(s: string) {
+  if (s === "M") return 0;
+  if (s === "F") return 1;
+  return 2;
+}
+
+function sortTees(tees: Tee[]): Tee[] {
+  return [...tees].sort((a, b) => {
+    const da = a.distances?.total ?? -1;
+    const db = b.distances?.total ?? -1;
+    if (db !== da) return db - da;
+    const sr = sexRank(a.sex) - sexRank(b.sex);
+    if (sr !== 0) return sr;
+    return a.teeName.localeCompare(b.teeName, "pt-PT", { sensitivity: "base" });
+  });
+}
+
+function filterTees(tees: Tee[], sex: SexFilter): Tee[] {
+  if (sex === "ALL") return tees;
+  return tees.filter((t) => t.sex === sex);
+}
+
+/** Score Differential = (113 / Slope) Ã— (Score - CR - PCC) */
 function calcSD(score: number, cr: number, slope: number, pcc = 0): number {
   return (113 / slope) * (score - cr - pcc);
 }
 
-/** Inverso: Score = SD × (Slope / 113) + CR + PCC */
+/** Inverso: Score = SD Ã— (Slope / 113) + CR + PCC */
 function calcScore(sd: number, cr: number, slope: number, pcc = 0): number {
   return sd * (slope / 113) + cr + pcc;
 }
 
-/** Playing Handicap = HI × (Slope / 113) + (CR - Par) */
+/** Playing Handicap = HI Ã— (Slope / 113) + (CR - Par) */
 function calcPlayingHcp(hi: number, slope: number, cr: number, par: number): number {
   return hi * (slope / 113) + (cr - par);
 }
 
 /**
- * WHS 2024 – Expected 9-hole Score Differential.
+ * WHS 2024 â€“ Expected 9-hole Score Differential.
  * Fórmula aproximada extraída dos dados oficiais (okrasa.eu / USGA FAQ):
- *   Expected_9h_SD ≈ HI × 0.52 + 1.2
+ *   Expected_9h_SD â‰ˆ HI Ã— 0.52 + 1.2
  *
- * Tabela de referência (HI inteiro → Expected 9h SD):
- *   0→1.2  1→1.7  2→2.2  3→2.8  4→3.3  5→3.8
- *   6→4.3  7→4.8  8→5.4  9→5.9  10→6.4 11→6.9
- *  12→7.4 13→8.0 14→8.5 15→9.0 16→9.5 17→10.0
- *  18→10.6 …
+ * Tabela de referência (HI inteiro â†’ Expected 9h SD):
+ *   0â†’1.2  1â†’1.7  2â†’2.2  3â†’2.8  4â†’3.3  5â†’3.8
+ *   6â†’4.3  7â†’4.8  8â†’5.4  9â†’5.9  10â†’6.4 11â†’6.9
+ *  12â†’7.4 13â†’8.0 14â†’8.5 15â†’9.0 16â†’9.5 17â†’10.0
+ *  18â†’10.6 â€¦
  *
- * Verificação: HI=14, SD_9h=7.2 → SD_18h = 7.2 + 8.5 = 15.7 ✓ (exemplo USGA)
+ * Verificação: HI=14, SD_9h=7.2 â†’ SD_18h = 7.2 + 8.5 = 15.7 âœ“ (exemplo USGA)
  */
 function expectedSD9(hi: number): number {
   // Tabela extraída dos dados oficiais com interpolação linear para HI fracionários
@@ -76,7 +103,7 @@ function get9hRatings(tee: Tee, nine: "front9" | "back9") {
   return { cr: r.courseRating, slope: r.slopeRating, par: r.par ?? null };
 }
 
-/* ─── Componente: Tabela de SD por Score (18h e 9h) ─── */
+/* â”€â”€â”€ Componente: Tabela de SD por Score (18h e 9h) â”€â”€â”€ */
 
 function SDTable({
   cr,
@@ -177,7 +204,7 @@ function SDTable({
                 )}
                 {hi !== null && (
                   <td className="sim-td sim-td-net">
-                    {r.netScore !== null ? r.netScore : "–"}
+                    {r.netScore !== null ? r.netScore : "â€“"}
                   </td>
                 )}
               </tr>
@@ -189,7 +216,7 @@ function SDTable({
   );
 }
 
-/* ─── Componente: Calculadora rápida (18h e 9h) ─── */
+/* â”€â”€â”€ Componente: Calculadora rápida (18h e 9h) â”€â”€â”€ */
 
 function QuickCalc({
   cr,
@@ -222,19 +249,19 @@ function QuickCalc({
         return {
           label: "SD 18h (WHS 2024)",
           value: fmtSD(sd18),
-          detail: `SD 9h = ${sd.toFixed(1)} + Expected 9h (HI ${hi.toFixed(1)}) = ${exp9.toFixed(1)} → SD 18h = ${sd18.toFixed(1)}`,
-          extra: `Fórmula: (113/${slope}) × (${v} − ${fmtCR(cr)}${pcc ? ` − ${pcc}` : ""}) = ${sd.toFixed(1)}`,
+          detail: `SD 9h = ${sd.toFixed(1)} + Expected 9h (HI ${hi.toFixed(1)}) = ${exp9.toFixed(1)} â†’ SD 18h = ${sd18.toFixed(1)}`,
+          extra: `Fórmula: (113/${slope}) Ã— (${v} âˆ’ ${fmtCR(cr)}${pcc ? ` âˆ’ ${pcc}` : ""}) = ${sd.toFixed(1)}`,
         };
       }
 
       return {
         label: is9h ? "SD 9 buracos" : "Score Differential",
         value: fmtSD(sd),
-        detail: `(113 / ${slope}) × (${v} − ${fmtCR(cr)}${pcc ? ` − ${pcc}` : ""}) = ${sd.toFixed(1)}`,
+        detail: `(113 / ${slope}) Ã— (${v} âˆ’ ${fmtCR(cr)}${pcc ? ` âˆ’ ${pcc}` : ""}) = ${sd.toFixed(1)}`,
         extra: is9h ? "Introduz o HI na toolbar para ver o SD 18h (WHS 2024)" : null,
       };
     } else {
-      // SD → Score: em modo 9h queremos o SD 18h final
+      // SD â†’ Score: em modo 9h queremos o SD 18h final
       if (is9h && hi !== null) {
         const exp9 = expectedSD9(hi);
         const target9hSD = v - exp9;
@@ -242,7 +269,7 @@ function QuickCalc({
         return {
           label: "Gross Score (9h) necessário",
           value: Math.ceil(score).toString(),
-          detail: `SD 18h pretendido ${v.toFixed(1)} − Expected ${exp9.toFixed(1)} = SD 9h ${target9hSD.toFixed(1)} → Score = ${score.toFixed(1)} → ${Math.ceil(score)}`,
+          detail: `SD 18h pretendido ${v.toFixed(1)} âˆ’ Expected ${exp9.toFixed(1)} = SD 9h ${target9hSD.toFixed(1)} â†’ Score = ${score.toFixed(1)} â†’ ${Math.ceil(score)}`,
           extra: null,
         };
       }
@@ -251,7 +278,7 @@ function QuickCalc({
       return {
         label: "Gross Score necessário",
         value: Math.ceil(score).toString(),
-        detail: `${v.toFixed(1)} × (${slope} / 113) + ${fmtCR(cr)}${pcc ? ` + ${pcc}` : ""} = ${score.toFixed(1)} → ${Math.ceil(score)}`,
+        detail: `${v.toFixed(1)} Ã— (${slope} / 113) + ${fmtCR(cr)}${pcc ? ` + ${pcc}` : ""} = ${score.toFixed(1)} â†’ ${Math.ceil(score)}`,
         extra: null,
       };
     }
@@ -264,13 +291,13 @@ function QuickCalc({
           className={`tab-btn ${mode === "score-to-sd" ? "active" : ""}`}
           onClick={() => { setMode("score-to-sd"); setInputVal(""); }}
         >
-          Score → SD
+          Score â†’ SD
         </button>
         <button
           className={`tab-btn ${mode === "sd-to-score" ? "active" : ""}`}
           onClick={() => { setMode("sd-to-score"); setInputVal(""); }}
         >
-          SD → Score
+          SD â†’ Score
         </button>
       </div>
 
@@ -307,7 +334,7 @@ function QuickCalc({
   );
 }
 
-/* ─── Página Principal ─── */
+/* â”€â”€â”€ Página Principal â”€â”€â”€ */
 
 const MANUAL_KEY = "__manual__";
 
@@ -322,7 +349,7 @@ function parseManual(m: ManualRatings): { cr: number; slope: number; par: number
   return { cr, slope, par: isNaN(par) ? (cr > 50 ? 72 : 36) : par };
 }
 
-/* ─── Componente: Inputs manuais de ratings ─── */
+/* â”€â”€â”€ Componente: Inputs manuais de ratings â”€â”€â”€ */
 
 function ManualInputs({
   label,
@@ -446,7 +473,7 @@ export default function SimuladorPage({ courses }: Props) {
     return availableTees[0];
   }, [availableTees, selectedTeeId]);
 
-  /* Dados do tee para cálculos (18h ou 9h) — campo selecionado OU manual */
+  /* Dados do tee para cálculos (18h ou 9h) â€” campo selecionado OU manual */
   const teeData = useMemo(() => {
     if (isManual) {
       if (is9h) {
@@ -536,12 +563,12 @@ export default function SimuladorPage({ courses }: Props) {
       <div className="master-detail">
         {/* Sidebar: lista de campos */}
         <div className={`sidebar ${sidebarOpen ? "" : "sidebar-closed"}`}>
-          {/* Opção manual — sempre visível */}
+          {/* Opção manual â€” sempre visível */}
           <button
             className={`course-item ${isManual ? "active" : ""}`}
             onClick={() => { setSelectedKey(MANUAL_KEY); setSelectedTeeId(null); }}
           >
-            <div className="course-item-name">✎ Sem campo (manual)</div>
+            <div className="course-item-name">âœŽ Sem campo (manual)</div>
             <div className="course-item-meta">Introduzir CR/Slope</div>
           </button>
           <div style={{ borderBottom: "1px solid var(--border, #ddd)", margin: "2px 0" }} />
@@ -576,7 +603,7 @@ export default function SimuladorPage({ courses }: Props) {
             <>
               <div className="detail-header">
                 <div>
-                  <h2 className="detail-title">✎ Modo Manual</h2>
+                  <h2 className="detail-title">âœŽ Modo Manual</h2>
                   <div className="detail-sub">
                     <span className="muted">Introduz CR e Slope para calcular. Par é opcional.</span>
                   </div>
@@ -637,11 +664,11 @@ export default function SimuladorPage({ courses }: Props) {
 
                   {is9h && (
                     <div className="sim-info-box">
-                      <strong>WHS 2024 — 9 buracos:</strong> O SD de 18 buracos é calculado somando
+                      <strong>WHS 2024 â€” 9 buracos:</strong> O SD de 18 buracos é calculado somando
                       o SD dos 9 buracos jogados com o Expected SD baseado no HI do jogador.
                       Fórmula: <code>SD_18h = SD_9h + Expected_9h(HI)</code>
                       {hi === null && (
-                        <span className="sim-info-warn"> ⚠ Preenche o HI na toolbar para ver o SD 18h.</span>
+                        <span className="sim-info-warn"> âš  Preenche o HI na toolbar para ver o SD 18h.</span>
                       )}
                     </div>
                   )}
@@ -649,7 +676,7 @@ export default function SimuladorPage({ courses }: Props) {
                   <QuickCalc cr={teeData.cr} slope={teeData.slope} par={teeData.par} pcc={pcc} hi={hi} is9h={is9h} />
 
                   <h3 className="sim-section-title">
-                    Tabela Score → SD {is9h ? `(${holesLabel})` : ""}
+                    Tabela Score â†’ SD {is9h ? `(${holesLabel})` : ""}
                   </h3>
                   <SDTable
                     cr={teeData.cr}
@@ -695,7 +722,7 @@ export default function SimuladorPage({ courses }: Props) {
                     >
                       <TeeBadge
                         label={titleCase(t.teeName)}
-                        colorHex={teeHexFromTee(t)}
+                        colorHex={teeHex(t)}
                         suffix={t.sex !== "U" ? t.sex : null}
                       />
                       <span className="sim-tee-info">
@@ -748,11 +775,11 @@ export default function SimuladorPage({ courses }: Props) {
               {/* Info box para 9 buracos */}
               {is9h && (
                 <div className="sim-info-box">
-                  <strong>WHS 2024 — 9 buracos:</strong> O SD de 18 buracos é calculado somando
+                  <strong>WHS 2024 â€” 9 buracos:</strong> O SD de 18 buracos é calculado somando
                   o SD dos 9 buracos jogados com o Expected SD baseado no HI do jogador.
                   Fórmula: <code>SD_18h = SD_9h + Expected_9h(HI)</code>
                   {hi === null && (
-                    <span className="sim-info-warn"> ⚠ Preenche o HI na toolbar para ver o SD 18h.</span>
+                    <span className="sim-info-warn"> âš  Preenche o HI na toolbar para ver o SD 18h.</span>
                   )}
                 </div>
               )}
@@ -762,7 +789,7 @@ export default function SimuladorPage({ courses }: Props) {
 
               {/* Tabela SD */}
               <h3 className="sim-section-title">
-                Tabela Score → SD {is9h ? `(${holesLabel})` : ""}
+                Tabela Score â†’ SD {is9h ? `(${holesLabel})` : ""}
               </h3>
               <SDTable
                 cr={teeData.cr}

@@ -113,6 +113,7 @@ html, body, #root {
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.15s;
+  text-decoration: none;
 }
 
 .nav-btn:hover:not(:disabled) {
@@ -877,6 +878,10 @@ html, body, #root {
 .count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 6px; font-size: 10px; font-weight: 700; padding: 0 5px; flex-shrink: 0; }
 .courseBtn { background: none; border: none; cursor: pointer; font: inherit; font-weight: 600; color: var(--text); text-align: left; padding: 0; }
 .courseBtn:hover { color: var(--accent); text-decoration: underline; }
+.courseLink { color: #2e7d32; text-decoration: underline; text-decoration-color: rgba(46,125,50,.3); text-underline-offset: 2px; cursor: pointer; }
+.courseLink:hover { color: #1b5e20; text-decoration-color: #1b5e20; }
+.sc-title .courseLink, .sc-header .courseLink { color: inherit; text-decoration-color: rgba(255,255,255,.4); }
+.sc-header-light .sc-title .courseLink { text-decoration-color: rgba(0,0,0,.3); }
 .pa-row-open > td { background: var(--bg-hover); }
 
 .details { display: none; }
@@ -1576,6 +1581,10 @@ a.dateLink .tee-date { text-decoration: underline; text-underline-offset: 2px; }
 .tourn-draw-player .jog-pill {
   padding: 2px 10px; font-size: 11.5px; font-weight: 600; border-radius: 6px; line-height: 1.5;
 }
+.tourn-draw-player .teePill,
+.tourn-draw-tee .teePill { font-size: 10px; padding: 2px 8px; }
+.tourn-lb-pills .teePill,
+.tourn-meta .teePill { font-size: 10px; padding: 1px 7px; vertical-align: middle; }
 
 /* PJA + INTL use their own solid backgrounds */
 /* PJA pill — matches app design */
