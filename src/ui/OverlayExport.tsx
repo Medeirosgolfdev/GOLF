@@ -111,9 +111,9 @@ function hiChLine(d:DD,v:Vis,s:Stats):string{
 function hexToRgba(hex:string,a:number){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
 
 /* ═══ A. PGA COLUMNS ═══ */
-function DA({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DA({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const sz=26;const is18=d.scores.length>=18;const sub=subParts(d,v);const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:BE,display:"inline-block",color:"#fff",background:"rgba(20,40,80,0.88)",overflow:"hidden"}}>
+  return<div style={{fontFamily:BE,width:140,color:"#fff",background:bg||"rgba(20,40,80,0.88)",overflow:"hidden",overflowWrap:"break-word"}}>
     {(v.player||v.round)&&<div style={{padding:"14px 12px 4px"}}>
       {v.player&&d.player&&<div style={{fontSize:30,lineHeight:1,letterSpacing:1}}>{d.player.toUpperCase()}</div>}
       {v.round&&<div style={{fontFamily:II,fontSize:9,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.5)",marginTop:2}}>ROUND {d.round}</div>}</div>}
@@ -134,9 +134,9 @@ function DA({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ B. GREEN COLUMNS ═══ */
-function DB({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DB({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const sz=24;const is18=d.scores.length>=18;
-  return<div style={{fontFamily:O,display:"inline-block",color:"#fff",background:"rgba(10,30,20,0.88)",borderRadius:14,overflow:"hidden"}}>
+  return<div style={{fontFamily:O,width:140,color:"#fff",background:bg||"rgba(10,30,20,0.88)",borderRadius:14,overflow:"hidden",overflowWrap:"break-word"}}>
     <div style={{padding:"14px 12px 4px"}}>
       {(v.round||v.date)&&<div style={{fontFamily:II,fontSize:8,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.4)"}}>
         {[v.round&&`R${d.round}`,v.date&&d.date].filter(Boolean).join(" \u00b7 ")}</div>}
@@ -160,9 +160,9 @@ function DB({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ C. 18BIRDIES ═══ */
-function DC({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DC({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:360,color:"#fff",background:"rgba(15,15,25,0.9)",borderRadius:16,padding:"14px 10px"}}>
+  return<div style={{fontFamily:II,width:360,color:"#fff",background:bg||"rgba(15,15,25,0.9)",borderRadius:16,padding:"14px 10px"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,padding:"0 6px"}}>
       <div>
         {v.date&&d.date&&<div style={{fontSize:9,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.4)"}}>{d.date}</div>}
@@ -188,9 +188,9 @@ function DC({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ D. LIGHT CARD ═══ */
-function DD_({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DD_({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;
-  return<div style={{fontFamily:II,width:380,background:"rgba(255,255,255,0.92)",borderRadius:14,padding:"16px 14px",color:"#222",border:"1px solid rgba(0,0,0,0.08)"}}>
+  return<div style={{fontFamily:II,width:380,background:bg||"rgba(255,255,255,0.92)",borderRadius:14,padding:"16px 14px",color:"#222",border:"1px solid rgba(0,0,0,0.08)"}}>
     <div style={{borderBottom:"2px solid #e5e7eb",paddingBottom:10,marginBottom:12}}>
       {v.course&&d.course&&<div style={{fontSize:16,fontWeight:900}}>{d.course}</div>}
       <div style={{fontSize:10,fontWeight:600,color:"#999",marginTop:2}}>{[v.date&&d.date,v.tee&&d.tee].filter(Boolean).join(" \u00b7 ")}</div></div>
@@ -216,8 +216,8 @@ function DD_({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ E-H: To Par Hero, Hero Giant, Sticker, Strip ═══ */
-function DE({d,v,s}:{d:DD;v:Vis;s:Stats}){const sub=subParts(d,{...v,date:false});const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:320,color:"#fff",background:"rgba(0,0,0,0.75)",borderRadius:16,padding:"20px 16px",textAlign:"center"}}>
+function DE({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){const sub=subParts(d,{...v,date:false});const hcl=hiChLine(d,v,s);
+  return<div style={{fontFamily:II,width:320,color:"#fff",background:bg||"rgba(0,0,0,0.75)",borderRadius:16,padding:"20px 16px",textAlign:"center"}}>
     <div style={{fontSize:10,fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.4)"}}>TO PAR</div>
     <div style={{fontSize:80,fontWeight:900,lineHeight:0.9,color:vpC(s.vpT),letterSpacing:-4,margin:"4px 0"}}>{fvp(s.vpT)}</div>
     <div style={{fontSize:14,fontWeight:700,color:"rgba(255,255,255,0.5)"}}>Gross <span style={{fontWeight:900,color:"#fff",fontSize:22}}>{s.sT}</span></div>
@@ -228,8 +228,8 @@ function DE({d,v,s}:{d:DD;v:Vis;s:Stats}){const sub=subParts(d,{...v,date:false}
     {v.stats&&<div style={{marginTop:12}}><StatsLine s={s} fs={14} lfs={9}/></div>}
     {hcl&&<div style={{fontSize:9,fontWeight:700,color:"rgba(255,255,255,0.2)",marginTop:8}}>{hcl}{v.date&&d.date?` \u00b7 ${d.date}`:""}</div>}</div>;}
 
-function DF({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:O,width:320,textAlign:"center",color:"#fff"}}><div style={{background:"rgba(0,0,0,0.72)",borderRadius:16,padding:"20px 18px 16px"}}>
+function DF({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){const hcl=hiChLine(d,v,s);
+  return<div style={{fontFamily:O,width:320,textAlign:"center",color:"#fff"}}><div style={{background:bg||"rgba(0,0,0,0.72)",borderRadius:16,padding:"20px 18px 16px"}}>
     {v.round&&<div style={{fontFamily:II,fontSize:9,fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.4)"}}>ROUND {d.round}</div>}
     {v.player&&d.player&&<div style={{fontSize:26,fontWeight:700,letterSpacing:1,marginTop:2}}>{d.player.toUpperCase()}</div>}
     {(v.course||v.tee)&&<div style={{fontFamily:II,fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.45)"}}>{[v.course&&d.course,v.tee&&d.tee].filter(Boolean).join(" \u00b7 ")}</div>}
@@ -243,15 +243,15 @@ function DF({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
     {hcl&&<div style={{fontFamily:II,fontSize:9,fontWeight:700,color:"rgba(255,255,255,0.25)",marginTop:6}}>{hcl}</div>}
   </div></div>;}
 
-function DG({d,v,s}:{d:DD;v:Vis;s:Stats}){
-  return<div style={{fontFamily:BE,color:"#fff",background:"rgba(20,40,70,0.85)",borderRadius:10,padding:"8px 14px",display:"inline-flex",alignItems:"center",gap:12,border:"1px solid rgba(255,255,255,0.15)"}}>
+function DG({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
+  return<div style={{fontFamily:BE,color:"#fff",background:bg||"rgba(20,40,70,0.85)",borderRadius:10,padding:"8px 14px",display:"inline-flex",alignItems:"center",gap:12,border:"1px solid rgba(255,255,255,0.15)"}}>
     <div style={{fontSize:36,lineHeight:1}}>{s.sT}</div>
     <div style={{fontFamily:II}}>{v.player&&d.player&&<div style={{fontSize:12,fontWeight:800}}>{d.player}</div>}
       {v.course&&d.course&&<div style={{fontSize:9,fontWeight:500,color:"rgba(255,255,255,0.4)"}}>{d.course}</div>}</div>
     <div style={{fontFamily:II,fontSize:20,fontWeight:900,color:vpC(s.vpT)}}>{fvp(s.vpT)}</div></div>;}
 
-function DH({d,v,s}:{d:DD;v:Vis;s:Stats}){
-  return<div style={{fontFamily:II,color:"#fff",background:"rgba(0,0,0,0.72)",borderRadius:12,padding:"12px 16px",display:"inline-flex",alignItems:"center",gap:14}}>
+function DH({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
+  return<div style={{fontFamily:II,color:"#fff",background:bg||"rgba(0,0,0,0.72)",borderRadius:12,padding:"12px 16px",display:"inline-flex",alignItems:"center",gap:14}}>
     <div>{v.player&&d.player&&<div style={{fontSize:14,fontWeight:700}}>{d.player}</div>}
       <div style={{fontSize:9,fontWeight:500,color:"rgba(255,255,255,0.4)"}}>{[v.course&&d.course,v.round&&`R${d.round}`].filter(Boolean).join(" \u00b7 ")}</div></div>
     <div style={{width:1,height:32,background:"rgba(255,255,255,0.15)"}}/>
@@ -260,12 +260,12 @@ function DH({d,v,s}:{d:DD;v:Vis;s:Stats}){
       <span style={{fontSize:22,fontWeight:900,color:vpC(s.vpT)}}>{fvp(s.vpT)}</span></div></div>;}
 
 /* ═══ I. GLASS CARD ═══ */
-function DI({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DI({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
   const HT=({off,label}:{off:number;label:string})=>{const cnt=is18?9:d.scores.length;
     return<div style={{marginBottom:off===0&&is18?2:0}}>
       <div style={{display:"flex",background:"rgba(45,106,48,0.7)",borderRadius:off===0?"8px 8px 0 0":0,padding:"4px 0"}}>
-        <div style={{width:52,padding:"0 6px",fontWeight:900,fontSize:11}}>Buraco</div>
+        <div style={{width:52,padding:"0 6px",fontWeight:900,fontSize:11}}>Hole</div>
         {d.par.slice(off,off+cnt).map((_,i)=><div key={i} style={{width:32,textAlign:"center",fontWeight:800,fontSize:12}}>{off+i+1}</div>)}
         <div style={{width:38,textAlign:"center",fontWeight:900,fontSize:11}}>{label}</div></div>
       {v.holeSI&&<div style={{display:"flex",padding:"2px 0",background:"rgba(255,255,255,0.03)"}}>
@@ -280,7 +280,7 @@ function DI({d,v,s}:{d:DD;v:Vis;s:Stats}){
         <div style={{width:52,padding:"0 6px",fontWeight:900,fontSize:12}}>Score</div>
         {d.scores.slice(off,off+cnt).map((sc,i)=><div key={i} style={{width:32,display:"flex",justifyContent:"center"}}><SC score={sc} par={d.par[off+i]} size={26}/></div>)}
         <div style={{width:38,textAlign:"center",fontWeight:900,fontSize:16}}>{d.scores.slice(off,off+cnt).reduce((a,b)=>a+b,0)}</div></div></div>;};
-  return<div style={{fontFamily:II,width:420,padding:18,background:"rgba(0,0,0,0.72)",borderRadius:16,color:"#fff",border:"1px solid rgba(255,255,255,0.08)"}}>
+  return<div style={{fontFamily:II,width:420,padding:18,background:bg||"rgba(0,0,0,0.72)",borderRadius:16,color:"#fff",border:"1px solid rgba(255,255,255,0.08)"}}>
     <div style={{textAlign:"center",marginBottom:14}}>
       {v.round&&<div style={{fontSize:10,fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.4)"}}>ROUND {d.round}</div>}
       {v.player&&d.player&&<div style={{fontSize:17,fontWeight:900,marginTop:2}}>{d.player}</div>}
@@ -298,7 +298,7 @@ function DI({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ J. CLASSIC TABLE ═══ */
-function DJ({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DJ({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
   const HT=({off,label}:{off:number;label:string})=>{const cnt=is18?9:d.scores.length;const isLast=!is18||off===9;
     return<div style={{marginBottom:off===0&&is18?2:0}}>
@@ -317,7 +317,7 @@ function DJ({d,v,s}:{d:DD;v:Vis;s:Stats}){
         {d.scores.slice(off,off+cnt).map((sc,i)=><div key={i} style={{width:32,display:"flex",justifyContent:"center"}}><SC score={sc} par={d.par[off+i]} size={26}/></div>)}
         <div style={{width:38,textAlign:"center",fontWeight:900,fontSize:15,color:"rgba(255,255,255,0.7)"}}>{off===0?s.sF:s.sB}</div>
         {isLast&&is18&&<div style={{width:38,textAlign:"center",fontWeight:900,fontSize:18}}>{s.sT}</div>}</div></div>;};
-  return<div style={{fontFamily:II,width:is18?460:380,padding:16,background:"rgba(15,30,55,0.85)",borderRadius:14,color:"#fff"}}>
+  return<div style={{fontFamily:II,width:is18?460:380,padding:16,background:bg||"rgba(15,30,55,0.85)",borderRadius:14,color:"#fff"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
       <div>{v.player&&d.player&&<div style={{fontSize:15,fontWeight:900}}>{d.player}</div>}
         <div style={{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.45)"}}>
@@ -333,9 +333,9 @@ function DJ({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ K. GRINT ROW ═══ */
-function DK({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DK({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:"rgba(25,45,75,0.88)",borderRadius:14,padding:"14px 12px"}}>
+  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:bg||"rgba(25,45,75,0.88)",borderRadius:14,padding:"14px 12px",overflowWrap:"break-word"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,gap:20}}>
       <div>
         {v.date&&d.date&&<div style={{fontSize:9,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.4)"}}>{d.date}</div>}
@@ -357,8 +357,8 @@ function DK({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ L. DOTS GRID ═══ */
-function DL({d,v,s}:{d:DD;v:Vis;s:Stats}){
-  return<div style={{fontFamily:II,width:360,color:"#fff",background:"rgba(15,30,55,0.82)",borderRadius:16,padding:"16px 14px"}}>
+function DL({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
+  return<div style={{fontFamily:II,width:360,color:"#fff",background:bg||"rgba(15,30,55,0.82)",borderRadius:16,padding:"16px 14px"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:14}}>
       <div>
         {(v.round||v.date)&&<div style={{fontSize:9,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.4)"}}>
@@ -373,8 +373,8 @@ function DL({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ M. NEON RING ═══ */
-function DM({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:190,color:"#fff",textAlign:"center",background:"rgba(0,0,0,0.78)",borderRadius:16,padding:"22px 14px",border:`2px solid ${vpC(s.vpT)}33`}}>
+function DM({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){const hcl=hiChLine(d,v,s);
+  return<div style={{fontFamily:II,width:190,color:"#fff",textAlign:"center",background:bg||"rgba(0,0,0,0.78)",borderRadius:16,padding:"22px 14px",border:`2px solid ${vpC(s.vpT)}33`}}>
     {v.round&&<div style={{fontSize:9,fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.35)"}}>ROUND {d.round}</div>}
     {v.player&&d.player&&<div style={{fontSize:18,fontWeight:900,letterSpacing:0.5,marginTop:4}}>{d.player.toUpperCase()}</div>}
     {v.course&&d.course&&<div style={{fontSize:10,fontWeight:500,color:"rgba(255,255,255,0.45)",marginTop:2}}>{d.course}</div>}
@@ -388,9 +388,9 @@ function DM({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
 }
 
 /* ═══ N. GRADIENT BAR ═══ */
-function DN({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DN({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:420,color:"#fff",background:"linear-gradient(135deg, rgba(15,30,55,0.85) 0%, rgba(20,50,35,0.8) 100%)",borderRadius:14,padding:"14px 18px"}}>
+  return<div style={{fontFamily:II,width:420,color:"#fff",background:bg||"linear-gradient(135deg, rgba(15,30,55,0.85) 0%, rgba(20,50,35,0.8) 100%)",borderRadius:14,padding:"14px 18px"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
       <div>{v.player&&d.player&&<div style={{fontSize:15,fontWeight:900}}>{d.player}</div>}
         <div style={{fontSize:10,fontWeight:500,color:"rgba(255,255,255,0.45)"}}>
@@ -412,8 +412,8 @@ function DN({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ O. TOURNAMENT ═══ */
-function DO_({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:320,color:"#fff",background:"rgba(15,35,60,0.85)",borderRadius:14,overflow:"hidden"}}>
+function DO_({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){const hcl=hiChLine(d,v,s);
+  return<div style={{fontFamily:II,width:320,color:"#fff",background:bg||"rgba(15,35,60,0.85)",borderRadius:14,overflow:"hidden"}}>
     <div style={{background:"rgba(45,106,48,0.8)",padding:"12px 16px",textAlign:"center"}}>
       <div style={{fontSize:11,fontWeight:700,letterSpacing:2,color:"rgba(255,255,255,0.6)"}}>
         {[v.round&&`ROUND ${d.round}`,v.date&&d.date].filter(Boolean).join(" \u00b7 ")}</div>
@@ -432,13 +432,13 @@ function DO_({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
 }
 
 /* ═══ P. DASHBOARD ═══ */
-function DPx({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DPx({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const Bx=({val,label,c,big}:{val:string|number;label:string;c?:string;big?:boolean})=>
     <div style={{flex:1,background:"rgba(255,255,255,0.06)",borderRadius:8,padding:big?"10px 8px":"6px 8px",textAlign:"center"}}>
       <div style={{fontSize:big?28:18,fontWeight:900,color:c||"#fff"}}>{val}</div>
       <div style={{fontSize:8,fontWeight:700,color:"rgba(255,255,255,0.35)",letterSpacing:1,marginTop:2}}>{label}</div></div>;
   const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,width:320,color:"#fff",background:"rgba(15,25,45,0.82)",borderRadius:14,padding:"16px 14px"}}>
+  return<div style={{fontFamily:II,width:320,color:"#fff",background:bg||"rgba(15,25,45,0.82)",borderRadius:14,padding:"16px 14px"}}>
     <div style={{textAlign:"center",marginBottom:12}}>
       {v.player&&d.player&&<div style={{fontSize:18,fontWeight:900}}>{d.player}</div>}
       <div style={{fontSize:10,fontWeight:500,color:"rgba(255,255,255,0.45)"}}>
@@ -454,8 +454,8 @@ function DPx({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ Q. TICKET ═══ */
-function DQ({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:LO,width:280,color:"#fff",background:"rgba(0,0,0,0.75)",borderRadius:4,padding:"14px 12px",border:"1px solid rgba(255,255,255,0.12)"}}>
+function DQ({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){const hcl=hiChLine(d,v,s);
+  return<div style={{fontFamily:LO,width:280,color:"#fff",background:bg||"rgba(0,0,0,0.75)",borderRadius:4,padding:"14px 12px",border:"1px solid rgba(255,255,255,0.12)"}}>
     <div style={{textAlign:"center",borderBottom:"1px dashed rgba(255,255,255,0.2)",paddingBottom:10,marginBottom:10}}>
       <div style={{fontFamily:II,fontSize:8,fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.35)"}}>SCORECARD</div>
       {v.player&&d.player&&<div style={{fontSize:16,fontWeight:700,fontStyle:"italic",marginTop:3}}>{d.player}</div>}
@@ -472,9 +472,9 @@ function DQ({d,v,s}:{d:DD;v:Vis;s:Stats}){const hcl=hiChLine(d,v,s);
 }
 
 /* ═══ R. HORIZONTAL WIDE ═══ */
-function DR({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DR({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;const hcl=hiChLine(d,v,s);
-  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:"rgba(15,25,45,0.85)",borderRadius:14,padding:"12px 12px"}}>
+  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:bg||"rgba(15,25,45,0.85)",borderRadius:14,padding:"12px 12px",overflowWrap:"break-word"}}>
     <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:8}}>
       <div style={{display:"flex",alignItems:"baseline",gap:5}}>
         <span style={{fontSize:32,fontWeight:900,letterSpacing:-2}}>{s.sT}</span>
@@ -499,9 +499,9 @@ function DR({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══ S. HORIZONTAL TABLE ═══ */
-function DS({d,v,s}:{d:DD;v:Vis;s:Stats}){
+function DS({d,v,s,bg}:{d:DD;v:Vis;s:Stats;bg?:string|null}){
   const is18=d.scores.length>=18;
-  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:"rgba(20,35,60,0.88)",borderRadius:12,padding:"10px 8px"}}>
+  return<div style={{fontFamily:II,display:"inline-block",color:"#fff",background:bg||"rgba(20,35,60,0.88)",borderRadius:12,padding:"10px 8px",overflowWrap:"break-word"}}>
     <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:6,padding:"0 4px"}}>
       <div style={{display:"flex",alignItems:"baseline",gap:4}}>
         <span style={{fontSize:22,fontWeight:900}}>{s.sT}</span>
@@ -526,7 +526,7 @@ function DS({d,v,s}:{d:DD;v:Vis;s:Stats}){
 }
 
 /* ═══════ DESIGN REGISTRY ═══════ */
-type DP_ = {d:DD;v:Vis;s:Stats};
+type DP_ = {d:DD;v:Vis;s:Stats;bg?:string|null};
 type DesignDef = { id:string; label:string; C:React.FC<DP_>; needsHoles:boolean };
 const DESIGNS: DesignDef[] = [
   {id:"A",label:"PGA Columns",C:DA,needsHoles:true},
@@ -581,7 +581,7 @@ export default function OverlayExport({data}:{data:OverlayData}){
   const [player,setPlayer]=useState(data.player||"Manuel");
   const [event,setEvent]=useState(data.event||"");
   const [round,setRound]=useState(data.round||1);
-  const [date,setDate]=useState(()=>data.date||(() => {const n=new Date();const m=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];return`${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;})());
+  const [date,setDate]=useState(()=>data.date||(() => {const n=new Date();const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return`${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;})());
   const [position,setPosition]=useState(data.position||"");
 
   const [vis,setVis]=useState<Vis>(defaultVis);
@@ -757,17 +757,10 @@ export default function OverlayExport({data}:{data:OverlayData}){
             <button className="ov-share-btn" onClick={()=>doExportOne(x.id)} title="Partilhar / Descarregar">📤</button>
           </div>
           <div className="ov-card-preview" style={checkerBg}>
-            {/* ▼ CAPTURE DIV — bg as separate layer so opacity doesn't affect content */}
+            {/* ▼ CAPTURE DIV — bg color behind design, visible through rgba backgrounds */}
             <div ref={el=>{designRefs.current[x.id]=el;}}
-              style={{
-                display:"inline-block",
-                position:"relative",
-                padding:bgColor?12:0,
-              }}>
-              {bgColor&&<div style={{position:"absolute",inset:0,background:bgColor,borderRadius:8,pointerEvents:"none"}}/>}
-              <div style={{position:"relative"}}>
-                <x.C d={dd} v={vis} s={stats}/>
-              </div>
+              style={{display:"inline-block"}}>
+              <x.C d={dd} v={vis} s={stats} bg={bgColor}/>
             </div>
           </div>
         </div>)}
